@@ -1,0 +1,10 @@
+{
+  "name": "coolai",
+  "description": "Generate marketing videos and images with COOL AI (www.coolai.mov) from your coding agent.",
+  "version": "1.0.0",
+  "homepage": "https://www.coolai.mov",
+  "author": {
+    "name": "COOL AI",
+    "url": "https://www.coolai.mov"
+  }
+}

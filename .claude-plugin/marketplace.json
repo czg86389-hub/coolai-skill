@@ -1,0 +1,16 @@
+{
+  "name": "coolai",
+  "owner": {
+    "name": "COOL AI"
+  },
+  "plugins": [
+    {
+      "name": "coolai",
+      "source": "./",
+      "description": "Generate marketing videos and images with COOL AI (www.coolai.mov)."
+    }
+  ],
+  "metadata": {
+    "description": "COOL AI skill: AI marketing videos and images from your coding agent."
+  }
+}

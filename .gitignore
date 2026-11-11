@@ -1,0 +1,4 @@
+node_modules/
+coolai-output/
+.coolai/
+*.log
