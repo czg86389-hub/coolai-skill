@@ -7,7 +7,7 @@ import os from 'node:os'
 import path from 'node:path'
 import crypto from 'node:crypto'
 
-const VERSION = '1.0.0'
+const VERSION = '1.1.0'
 const DEFAULT_BASE = 'https://www.coolai.mov'
 const CONFIG_DIR = path.join(os.homedir(), '.coolai')
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
@@ -298,36 +298,56 @@ async function buildVideo(opt) {
   return payload
 }
 async function buildImage(opt) {
-  const refs = await resolveRefs(list(opt.ref))
+  let pack = null
+  if (opt.pack) {
+    if (SET_PACKS[str(opt.pack)]) throw new CliError(`"${opt.pack}" makes a whole set of images. Use: imageset --pack ${opt.pack} --slot product=<file>`)
+    pack = await findPack(str(opt.pack))
+  }
+  let refs
+  let slots = [{ key: 'product', name: '图片', count: 0 }]
+  if (pack) {
+    const r = await resolveSlots(opt, packSlots(pack))
+    refs = r.refs
+    slots = r.reference_slots
+  } else {
+    if (list(opt.slot).length) throw new CliError('--slot needs --pack. Without a pack use --ref')
+    refs = await resolveRefs(list(opt.ref))
+    slots[0].count = refs.length
+  }
   const model = str(opt.model) || (await defaultModel('image'))
   const count = Math.min(4, Math.max(1, num(opt.count, 1)))
+  const hasPrompt = !!(opt.prompt || opt['prompt-file'])
   return {
+    ...(pack ? { skill_pack_id: pack.skill_pack_id } : await styleOpts(opt)),
     type: 'image_generation',
     tool_slug: 'image-generation',
     model_key: model,
     logical_model_key: model,
     count,
     generate_count: count,
-    prompt: readPrompt(opt),
+    // with a skill pack the prompt is optional (the pack carries its own instructions)
+    prompt: pack && !hasPrompt ? undefined : readPrompt(opt),
     aspect_ratio: str(opt.ratio, 'auto'),
     resolution: str(opt.resolution, '1k'),
     quality: str(opt.quality, 'high'),
     output_format: 'png',
     reference_urls: refs.map((r) => r.url),
     reference_elements: refs.map((r) => ({ asset_id: r.asset_id, media_type: 'image', mention_label: r.mention_label })),
-    reference_slots: [{ key: 'product', name: '图片', count: refs.length }],
+    reference_slots: slots,
   }
 }
 async function generate(kind, opt) {
-  const payload = kind === 'video' ? await buildVideo(opt) : await buildImage(opt)
+  const payload = kind === 'video' ? await buildVideo(opt) : kind === 'replica' ? await buildReplica(opt) : await buildImage(opt)
   const acct = await me()
   const q = await quote(payload)
   const summary = {
     kind,
     model: payload.model_key,
-    ...(kind === 'video' ? { duration_seconds: payload.duration_seconds, resolution: payload.resolution, aspect_ratio: payload.aspect_ratio, audio: payload.generate_audio } : { count: payload.count, resolution: payload.resolution, aspect_ratio: payload.aspect_ratio, quality: payload.quality }),
+    ...(payload.skill_pack_id ? { pack: payload.skill_pack_id } : {}),
+    ...(kind === 'replica' ? { duration_seconds: payload.duration_seconds, resolution: payload.resolution, aspect_ratio: payload.aspect_ratio, sound: payload.keep_source_audio ? 'original' : payload.generate_audio ? 'ai' : 'mute' } : kind === 'video' ? { duration_seconds: payload.duration_seconds, resolution: payload.resolution, aspect_ratio: payload.aspect_ratio, audio: payload.generate_audio } : { count: payload.count, resolution: payload.resolution, aspect_ratio: payload.aspect_ratio, quality: payload.quality }),
     references: payload.reference_elements.map((r) => ({ label: r.mention_label, asset_id: r.asset_id })),
   }
+  if (kind === 'replica') payload.confirmed_estimated_credits = q.credits
   if (!opt.confirm) {
     return {
       ok: true,
@@ -469,6 +489,421 @@ async function director(opt) {
   }
 }
 
+// ---------- image skill packs (技能包) ----------
+// The three "set" packs make a whole set of images from one product photo: the service first writes a
+// plan (free), the user reviews it, then the images are generated. Module tables mirror the website.
+const SET_PACKS = {
+  'ecommerce-image-set': {
+    set_kind: undefined,
+    title: undefined,
+    slots: [
+      { key: 'product', name: '商品', required: true, max_count: 8 },
+      { key: 'person', name: '人物', required: false, max_count: 2 },
+      { key: 'background', name: '背景', required: false, max_count: 3 },
+    ],
+    defaults: { hero: 1, scene: 2, selling_point: 1, detail: 1 },
+    modules: [
+      ['hero', '首图 / 主视觉', 'Hero image: first impression of the product'],
+      ['scene', '场景图 / 使用', 'Scene: the product in real use'],
+      ['pain_point', '痛点图 / 解决', 'Pain point and how the product solves it'],
+      ['selling_point', '卖点图 / 功效', 'Key selling points and benefits'],
+      ['detail', '细节图 / 材质', 'Close-up of material and craftsmanship'],
+      ['usage', '用法图 / 多用途', 'How to use it, step by step'],
+      ['package', '包装图 / 到手', 'Packaging and unboxing'],
+      ['cta', '收尾图 / CTA', 'Closing image with a call to action'],
+      ['ingredient', '成分图 / 配料', 'Ingredients'],
+      ['structure', '结构图 / 功能', 'Structure breakdown and functions'],
+      ['comparison', '对比图 / 同行对比', 'Comparison with ordinary products'],
+      ['size', '尺码图 / 规格', 'Size chart (put the size data in --prompt)'],
+    ],
+  },
+  'social-image-set': {
+    set_kind: 'social',
+    title: '种草图文',
+    slots: [{ key: 'product', name: '商品', required: true, max_count: 4 }],
+    defaults: { cover: 1, annotate: 1, compare: 1, steps: 1, comic: 1, quote: 1 },
+    modules: [
+      ['cover', '封面 / 大标题', 'Cover with a big headline'],
+      ['annotate', '卖点标注图', 'Product with arrows pointing at each selling point'],
+      ['compare', '对比图 / 普通款 vs 这一款', 'Side-by-side comparison'],
+      ['steps', '步骤教程图', 'Step-by-step tutorial'],
+      ['surround', '要点环绕卡', 'Product in the middle, key points around it'],
+      ['tips', '选购要点卡', 'Buying tips, numbered'],
+      ['comic', '四格漫画', 'Four-panel comic'],
+      ['quote', '金句大字卡', 'Big-text quote card'],
+      ['lifestyle', '种草场景图', 'Lifestyle scene without text'],
+      ['micro', '微缩创意图', 'Miniature people interacting with the product'],
+    ],
+  },
+  'ip-mascot-set': {
+    set_kind: 'ip',
+    title: '品牌 IP 形象',
+    slots: [{ key: 'product', name: '参考图', required: false, max_count: 3 }],
+    defaults: { mascot: 1, turnaround: 1, expressions: 1, poses: 1, merch: 1, poster: 1 },
+    modules: [
+      ['mascot', '主形象卡', 'Main character card (always first; the rest follow it)'],
+      ['turnaround', '三视图', 'Front / side / back turnaround'],
+      ['expressions', '表情卡', 'Four expressions'],
+      ['poses', '动作卡', 'Three signature poses'],
+      ['profile', '角色档案卡', 'Character profile'],
+      ['palette', '配色卡', 'Colour palette and materials'],
+      ['merch', '周边应用卡', 'Merchandise mock-ups'],
+      ['stickers', '表情包', 'Six stickers with text'],
+      ['poster', '品牌海报', 'Brand poster with the mascot'],
+      ['world', '世界观场景', 'The world the mascot lives in'],
+    ],
+  },
+}
+const COPY_LANGS = ['无文案', '中文', '英文', '泰语', '马来语', '巴西葡萄牙语', '不限']
+
+async function rawPacks() {
+  const d = await api('GET', '/api/v1/tools/image-generation/skill-packs', null, { auth: false })
+  return (d.skill_packs || []).filter((p) => !p.is_default_profile && p.skill_pack_id !== 'default')
+}
+function packSlots(p) {
+  if (SET_PACKS[p.skill_pack_id]) return SET_PACKS[p.skill_pack_id].slots
+  return (((p.reference_solt_config || {}).solts || []).filter((t) => t && t.key)).map((t) => ({ key: t.key, name: t.name, required: !!t.required, max_count: t.max_count || 1 }))
+}
+async function imagePacks() {
+  return (await rawPacks()).map((p) => {
+    const set = SET_PACKS[p.skill_pack_id]
+    return {
+      pack: p.skill_pack_id,
+      name: p.label,
+      category: p.category && p.category.label,
+      description: p.description,
+      command: set ? 'imageset' : 'image --pack',
+      slots: packSlots(p).map((t) => ({ slot: t.key, name: t.name, required: !!t.required, max: t.max_count || 1 })),
+      ...(set ? { modules: set.modules.map(([key, zh, en]) => ({ key, name: zh, about: en })), default_modules: set.defaults } : {}),
+    }
+  })
+}
+async function findPack(id) {
+  const all = await rawPacks()
+  const p = all.find((x) => x.skill_pack_id === id)
+  if (!p) throw new CliError(`Unknown image skill pack "${id}". Valid: ${all.map((x) => x.skill_pack_id).join(', ')}`)
+  return p
+}
+/** --slot key=file|asset_id (repeatable) and --ref (goes to the first slot) → references in slot order */
+async function resolveSlots(opt, slots) {
+  const bySlot = Object.fromEntries(slots.map((t) => [t.key, []]))
+  for (const v of list(opt.slot)) {
+    const i = String(v).indexOf('=')
+    if (i < 1) throw new CliError(`--slot must look like ${slots[0] ? slots[0].key : 'product'}=<file or asset_id>`)
+    const key = String(v).slice(0, i)
+    if (!bySlot[key]) throw new CliError(`This pack has no slot "${key}". Its slots: ${slots.map((t) => t.key + ' (' + t.name + ')').join(', ')}`)
+    bySlot[key].push(String(v).slice(i + 1))
+  }
+  if (list(opt.ref).length) {
+    if (!slots.length) throw new CliError('This pack takes no reference images')
+    bySlot[slots[0].key].push(...list(opt.ref))
+  }
+  for (const t of slots) {
+    const n = bySlot[t.key].length
+    if (t.required && !n) throw new CliError(`Missing required image for slot "${t.key}" (${t.name}). Add: --slot ${t.key}=<file>`)
+    if (n > (t.max_count || 1)) throw new CliError(`Slot "${t.key}" (${t.name}) takes at most ${t.max_count || 1} image(s)`)
+  }
+  const order = []
+  for (const t of slots) for (const v of bySlot[t.key]) order.push([t.key, v])
+  const refs = await resolveRefs(order.map((x) => x[1]))
+  if (refs.some((r) => r.media_type !== 'image')) throw new CliError('Image skill packs only take image files')
+  refs.forEach((r, i) => (r.slot = order[i][0]))
+  return { refs, reference_slots: slots.map((t) => ({ key: t.key, name: t.name, count: bySlot[t.key].length })) }
+}
+async function styleLibrary() {
+  const d = await api('GET', '/api/v1/public/style-library', null, { auth: false })
+  const cats = Object.fromEntries((d.cats || []).map((c) => [c.key, c.zh]))
+  return {
+    styles: (d.styles || []).map((s) => ({ id: s.id, name: s.zh, name_en: s.en, category: cats[s.cat] || s.cat })),
+    colors: (d.colors || []).map((c) => ({ id: c.id, name: c.zh, name_en: c.en, hex: c.hex })),
+  }
+}
+async function styleOpts(opt) {
+  const out = {}
+  if (!opt.style && !opt.color) return out
+  const lib = await styleLibrary()
+  if (opt.style) {
+    if (!lib.styles.some((s) => s.id === str(opt.style))) throw new CliError(`Unknown style "${opt.style}". Run: styles`)
+    out.style_id = str(opt.style)
+  }
+  if (opt.color) {
+    if (!lib.colors.some((c) => c.id === str(opt.color))) throw new CliError(`Unknown colour "${opt.color}". Run: styles`)
+    out.color_id = str(opt.color)
+  }
+  return out
+}
+
+function setRowsOut(detail) {
+  return (detail.items || []).map((it, i) => {
+    const o = it.output || it.output_json || {}
+    const row = o.row || {}
+    return {
+      row: i + 1,
+      module: row.module_purpose || row.module_label || row.module_key,
+      status: it.status,
+      uses: row.referenced_images || undefined,
+      prompt: row.final_prompt || undefined,
+      url: o.url ? absUrl(o.url) : undefined,
+      error: it.status === 'failed' ? o.error || it.error || 'failed' : undefined,
+    }
+  })
+}
+async function setQuote(id, acct) {
+  const q = await api('POST', `/api/v1/batches/${id}/ecommerce-image-set/row-quote`, {})
+  return {
+    credits: round2(q.credits ?? q.estimated_credits ?? 0),
+    count: q.count,
+    per_image: q.unit != null ? round2(q.unit) : undefined,
+    available_credits: q.available_credits != null ? round2(q.available_credits) : acct.credits,
+    is_affordable: q.available_credits != null ? Number(q.available_credits) >= Number(q.credits ?? 0) : undefined,
+  }
+}
+/** imageset: step 1 — upload, ask the service for a plan (free). */
+async function imageSetPlan(opt) {
+  const id = str(opt.pack, 'ecommerce-image-set')
+  const def = SET_PACKS[id]
+  if (!def) throw new CliError(`"${id}" is not a set pack. Set packs: ${Object.keys(SET_PACKS).join(', ')}. For other packs use: image --pack ${id}`)
+  await findPack(id)
+  let counts = def.defaults
+  if (opt.modules) {
+    counts = {}
+    for (const part of str(opt.modules).split(/[,，\s]+/).filter(Boolean)) {
+      const [k, n] = part.split('=')
+      if (!def.modules.some((m) => m[0] === k)) throw new CliError(`Unknown module "${k}" for ${id}. Valid: ${def.modules.map((m) => m[0]).join(', ')}`)
+      counts[k] = Math.max(0, Math.round(num(n === undefined ? 1 : n, 1)))
+    }
+  }
+  const rows = []
+  for (const [key, full] of def.modules) for (let i = 0; i < (counts[key] || 0); i++) rows.push({ module_key: key, module_label: full, index: i })
+  if (!rows.length) throw new CliError('Choose at least one module, e.g. --modules hero=1,scene=2')
+  if (rows.length > 16) throw new CliError('A set can have at most 16 images')
+  const lang = str(opt.lang, '中文')
+  if (!COPY_LANGS.includes(lang)) throw new CliError(`--lang must be one of: ${COPY_LANGS.join(' / ')}`)
+  const { refs, reference_slots } = await resolveSlots(opt, def.slots)
+  const model = str(opt.model) || (await defaultModel('image'))
+  const prompt = opt.prompt || opt['prompt-file'] ? readPrompt(opt) : undefined
+  const body = {
+    type: 'ecommerce_image_set',
+    tool_slug: 'ecommerce-image-set',
+    skill_pack_id: id,
+    set_kind: def.set_kind,
+    title: def.title,
+    ...(await styleOpts(opt)),
+    model_key: model,
+    logical_model_key: model,
+    rows,
+    count: rows.length,
+    aspect_ratio: str(opt.ratio, '3:4'),
+    resolution: '1k',
+    quality: str(opt.quality, 'high'),
+    output_format: 'png',
+    copy_language: lang,
+    prompt,
+    reference_elements: refs.map((r) => ({ asset_id: r.asset_id, media_type: 'image', mention_label: r.mention_label, ref_role: r.slot })),
+    reference_slots,
+    analysis_only: true,
+  }
+  const acct = await me()
+  const created = await api('POST', '/api/v1/batches', body)
+  const bid = created.id || created.batch_id
+  const limit = num(opt.timeout, 600) * 1000
+  const start = Date.now()
+  let d
+  for (;;) {
+    d = await api('GET', '/api/v1/batches/' + bid)
+    if (DONE.has(String(d.status))) break
+    if (Date.now() - start > limit) throw new CliError(`The plan is still being written. Check later with: imageset-generate ${bid}`, { set_id: bid })
+    process.stderr.write(`[coolai] planning ${pct(d.progress)} (${Math.round((Date.now() - start) / 1000)}s)\n`)
+    await sleep(5000)
+  }
+  if (d.status !== 'succeeded') throw new CliError('Planning failed: ' + ((d.result || {}).error || d.status))
+  const q = await setQuote(bid, acct)
+  return {
+    ok: true,
+    submitted: false,
+    set_id: bid,
+    pack: id,
+    model,
+    images: rows.length,
+    plan: setRowsOut(d),
+    quote: q,
+    account: acct,
+    web_url: CFG.base_url + '/toolbox/image-generation',
+    next: `The plan is ready and nothing was charged. Show the user each row (module + what it will show), and that generating all ${rows.length} images costs ${q.credits} credits (balance ${q.available_credits}). To change one image first: imageset-edit ${bid} --row N --prompt "...". When the user agrees: imageset-generate ${bid} --confirm`,
+  }
+}
+/** imageset-edit: change one row's prompt before generating (free). */
+async function imageSetEdit(id, opt) {
+  const row = Math.round(num(opt.row, 0))
+  if (!row) throw new CliError('Usage: imageset-edit <set_id> --row N --prompt "..." (or --prompt-file F)')
+  await api('PATCH', `/api/v1/batches/${id}/ecommerce-image-set/analysis-row`, { row_index: row, final_prompt: readPrompt(opt) })
+  const d = await api('GET', '/api/v1/batches/' + id)
+  return { ok: true, set_id: id, plan: setRowsOut(d), next: `Row ${row} updated. When the user agrees: imageset-generate ${id} --confirm` }
+}
+/** imageset-generate: step 2 — quote, then (with --confirm) generate the pending rows and download. */
+async function imageSetGenerate(id, opt) {
+  const acct = await me()
+  let d = await api('GET', '/api/v1/batches/' + id)
+  if (d.type !== 'ecommerce_image_set') throw new CliError('That task is not an image set')
+  const pending = (d.items || []).filter((it) => it.status === 'pending').length
+  const running = (d.items || []).some((it) => it.status === 'running')
+  if (pending && !running) {
+    const q = await setQuote(id, acct)
+    if (!opt.confirm) {
+      return { ok: true, submitted: false, set_id: id, plan: setRowsOut(d), quote: q, account: acct, next: `Generating ${q.count} image(s) costs ${q.credits} credits (balance ${q.available_credits}). Nothing was charged. After the user agrees, run again with --confirm.` }
+    }
+    if (q.is_affordable === false) throw new CliError(`Not enough credits: needs ${q.credits}, balance ${q.available_credits}. Top up at ${CFG.base_url}`, { reason: 'insufficient_credits' })
+    await api('POST', `/api/v1/batches/${id}/ecommerce-image-set/row-generations`, {})
+  } else if (!pending && !running && !opt.confirm) {
+    // nothing left to generate: just report (and download below)
+  }
+  if (opt['no-wait']) return { ok: true, submitted: true, set_id: id, next: `Check later with: imageset-generate ${id}` }
+  const limit = num(opt.timeout, 1800) * 1000
+  const start = Date.now()
+  for (;;) {
+    d = await api('GET', '/api/v1/batches/' + id)
+    const busy = (d.items || []).some((it) => it.status === 'running') || d.status === 'running' || d.status === 'pending' || d.status === 'queued'
+    if (!busy) break
+    if (Date.now() - start > limit) return { ok: true, set_id: id, timed_out: true, rows: setRowsOut(d), next: `Still generating. Check again with: imageset-generate ${id}` }
+    const done = (d.items || []).filter((it) => it.status === 'succeeded').length
+    process.stderr.write(`[coolai] ${done}/${(d.items || []).length} images done (${Math.round((Date.now() - start) / 1000)}s)\n`)
+    await sleep(6000)
+  }
+  const rows = setRowsOut(d).map(({ prompt, uses, ...r }) => r)
+  const urls = rows.filter((r) => r.url).map((r) => r.url)
+  const out = { ok: true, submitted: true, set_id: id, status: d.status, credits_cost: d.credits_cost != null ? round2(d.credits_cost) : undefined, rows, outputs: urls, web_url: CFG.base_url + '/toolbox/image-generation' }
+  if (urls.length && !opt['no-download']) out.files = await download(urls, path.resolve(str(opt.out, './coolai-output')))
+  const failed = rows.filter((r) => r.status === 'failed').length
+  if (failed) out.next = `${failed} image(s) failed and were refunded automatically.`
+  return out
+}
+
+// ---------- more video tools ----------
+async function simpleBatch(body, timeoutSec) {
+  const created = await api('POST', '/api/v1/batches', body)
+  const id = created.id || (created.batch && created.batch.id) || created.batch_id
+  const start = Date.now()
+  let d
+  for (;;) {
+    d = await api('GET', '/api/v1/batches/' + id)
+    if (DONE.has(String(d.status))) break
+    if (Date.now() - start > timeoutSec * 1000) throw new CliError(`"${body.title || body.type}" is taking too long. Task id: ${id}`)
+    process.stderr.write(`[coolai] ${body.title || body.type}: ${d.status} ${pct(d.progress)} (${Math.round((Date.now() - start) / 1000)}s)\n`)
+    await sleep(6000)
+  }
+  if (d.status !== 'succeeded') throw new CliError(`"${body.title || body.type}" failed: ${(d.result || {}).error || d.status} (credits are refunded automatically)`)
+  return { id, result: d.result || {}, credits_cost: Number(d.credits_cost) || 0 }
+}
+const opId = (p) => p + '_' + crypto.randomBytes(8).toString('hex')
+const SCENES = ['commerce', 'local', 'home_service', 'education']
+/** viral: 超越爆款 — break down a hit video, then write a better script for the user's own product. */
+async function viral(opt) {
+  if (!opt.video) throw new CliError('Usage: viral --video <reference video file or asset_id> [--ref product images ...] [--duration 30] [--scene commerce|local|home_service|education] [--lang zh|en] [--note "..."]')
+  const scene = str(opt.scene, 'commerce')
+  if (!SCENES.includes(scene)) throw new CliError('--scene must be one of: ' + SCENES.join(' / '))
+  const duration = Math.max(4, Math.min(60, Math.round(num(opt.duration, 30))))
+  const [video] = await resolveRefs([str(opt.video)])
+  if (video.media_type !== 'video') throw new CliError('--video must be a video file (mp4 / mov / webm, up to 60 seconds)')
+  const images = await resolveRefs(list(opt.ref))
+  if (images.some((r) => r.media_type !== 'image')) throw new CliError('--ref takes product images here')
+  const acct = await me()
+  const qb = (type) => api('POST', '/api/v1/credits/quote', { type, tool_slug: 'prompt-generator' }).then((q) => Number(q.estimated_credits ?? q.credits ?? 0)).catch(() => 0)
+  const [qa, qbd, qs] = await Promise.all([images.length ? qb('write_material_analysis') : 0, qb('video_script_breakdown'), qb('write_script_generate')])
+  const total = round2(qa + qbd + qs)
+  const reuse = ` --video ${video.asset_id}${images.map((r) => ' --ref ' + r.asset_id).join('')}`
+  if (!opt.confirm) {
+    return {
+      ok: true,
+      submitted: false,
+      quote: { credits: total, analyze_images: round2(qa), break_down_video: round2(qbd), write_script: round2(qs), available_credits: acct.credits },
+      account: acct,
+      request: { video: video.asset_id, images: images.map((r) => ({ label: r.mention_label, asset_id: r.asset_id })), duration_seconds: duration, scene },
+      next: `Breaking down the reference video and writing a new script costs about ${total} credits (balance ${acct.credits}). Nothing was charged. After the user agrees run: viral${reuse} --duration ${duration} --scene ${scene} --confirm`,
+    }
+  }
+  if (acct.credits < total) throw new CliError(`Not enough credits: needs about ${total}, balance ${acct.credits}`, { reason: 'insufficient_credits' })
+  const imgRefs = images.map((r) => ({ asset_id: r.asset_id, media_type: 'image', mention_label: r.mention_label }))
+  let analyses = []
+  let spent = 0
+  if (images.length) {
+    const a = await simpleBatch({ type: 'write_material_analysis', tool_slug: 'prompt-generator', title: '超越爆款：分析素材', reference_elements: imgRefs, client_operation_id: opId('an') }, 300)
+    analyses = (a.result.items || []).map((x) => ({ label: x.label, description: x.description }))
+    spent += a.credits_cost
+  }
+  const bd = await simpleBatch({ type: 'video_script_breakdown', tool_slug: 'prompt-generator', title: '超越爆款：拆解参考视频', reference_elements: [{ asset_id: video.asset_id, media_type: 'video', mention_label: '视频1' }], client_operation_id: opId('bd') }, 480)
+  spent += bd.credits_cost
+  const sc = await simpleBatch({
+    type: 'write_script_generate',
+    tool_slug: 'prompt-generator',
+    title: '超越爆款：生成视频脚本',
+    reference_elements: imgRefs,
+    analyses,
+    characters: [],
+    business_scene: scene,
+    script_language: str(opt.lang, 'zh'),
+    duration_seconds: duration,
+    mode: 'reference',
+    breakdown_batch_id: bd.id,
+    extra_instruction: str(opt.note) || undefined,
+    client_operation_id: opId('sc'),
+  }, 420)
+  spent += sc.credits_cost
+  const dir = path.resolve(str(opt.out, './coolai-output'))
+  fs.mkdirSync(dir, { recursive: true })
+  const scriptFile = path.join(dir, `viral-script-${sc.id.slice(0, 8)}.txt`)
+  const bdFile = path.join(dir, `viral-breakdown-${bd.id.slice(0, 8)}.md`)
+  fs.writeFileSync(scriptFile, sc.result.markdown || '', 'utf8')
+  fs.writeFileSync(bdFile, bd.result.markdown || '', 'utf8')
+  return {
+    ok: true,
+    script: sc.result.markdown || '',
+    script_file: scriptFile,
+    breakdown_file: bdFile,
+    charged_credits: round2(spent),
+    next: `Show the script to the user (the breakdown of the reference video is in breakdown_file). To make the video: video --prompt-file "${scriptFile}" --duration ${Math.min(duration, 15)} --skill beyond-viral${images.map((r) => ' --ref ' + r.asset_id).join('')}  (check the model's max duration with: models video)`,
+  }
+}
+/** replica: 深度复刻 — copy the moves, camera and pacing of a reference video with your own product / person / background. */
+async function buildReplica(opt) {
+  if (!opt.video) throw new CliError('Usage: replica --video <reference video file or asset_id> [--product img ...] [--person img ...] [--background img ...] [--voice audio] [--prompt "what to change"] [--sound original|ai|mute]')
+  const [video] = await resolveRefs([str(opt.video)])
+  if (video.media_type !== 'video') throw new CliError('--video must be a video file')
+  const els = [{ asset_id: video.asset_id, media_type: 'video', mention_label: '视频1', url: video.url }]
+  let images = 0
+  for (const [flag, prefix, role, kind] of [['product', '商品', 'product', 'image'], ['person', '人物', 'person', 'image'], ['background', '背景', 'background', 'image'], ['voice', '声音', 'voice', 'audio']]) {
+    const vals = list(opt[flag])
+    if (!vals.length) continue
+    const refs = await resolveRefs(vals)
+    refs.forEach((r, i) => {
+      if (r.media_type !== kind) throw new CliError(`--${flag} must be ${kind === 'audio' ? 'an audio file' : 'image files'}`)
+      if (kind === 'image') images += 1
+      els.push({ asset_id: r.asset_id, media_type: kind, mention_label: prefix + (i + 1), ...(kind !== 'audio' ? { ref_role: role } : {}), url: r.url })
+    })
+  }
+  if (images > 8) throw new CliError('Deep Replica takes at most 8 images in total')
+  if (list(opt.voice).length > 1) throw new CliError('Only one --voice file')
+  const sound = str(opt.sound, 'original')
+  if (!['original', 'ai', 'mute'].includes(sound)) throw new CliError('--sound must be original / ai / mute')
+  const model = str(opt.model) || 'video.doubao_seedance_2_0_mini'
+  const payload = {
+    type: 'depth_video_clone',
+    tool_slug: 'depth-video-clone',
+    model_key: model,
+    logical_model_key: model,
+    prompt: opt.prompt || opt['prompt-file'] ? readPrompt(opt) : '',
+    aspect_ratio: str(opt.ratio, '9:16'),
+    resolution: str(opt.resolution, '480p'),
+    duration_seconds: Math.max(4, Math.min(60, Math.round(num(opt.duration, 10)))),
+    generate_count: 1,
+    generate_audio: sound === 'ai',
+    keep_source_audio: sound === 'original',
+    reference_elements: els,
+    client_operation_id: opId('dr'),
+  }
+  if (opt['portrait-consent']) payload.portrait_consent = true
+  return payload
+}
+
 // ---------- main ----------
 const HELP = `COOL AI skill CLI ${VERSION}  (${DEFAULT_BASE})
 
@@ -483,10 +918,26 @@ const HELP = `COOL AI skill CLI ${VERSION}  (${DEFAULT_BASE})
          [--ratio 9:16|16:9|1:1|3:4|4:3] [--ref file|asset_id ...] [--skill KEY] [--no-audio]
          [--portrait-consent] [--confirm]
   script --brief "..." [--skill KEY] [--duration 15] [--ref ...] [--style explain|ugc] [--lang zh|en] [--confirm]
+
+  packs                         image skill packs (技能包): slots and, for set packs, modules
+  styles                        art styles and theme colours (ids for --style / --color)
+  image  --pack ID --slot KEY=file|asset_id ... [--prompt "..."]      one image with a skill pack
+  imageset --pack ecommerce-image-set|social-image-set|ip-mascot-set --slot product=file ...
+         [--modules hero=1,scene=2,...] [--lang 中文|英文|无文案|...] [--ratio 3:4] [--style ID] [--color ID]
+         [--prompt "product facts"]             writes the plan for a whole set (free), returns set_id
+  imageset-edit <set_id> --row N --prompt "..."  change one image's prompt before generating (free)
+  imageset-generate <set_id> [--confirm]         price, then generate and download the set
+
+  viral  --video file|asset_id [--ref product images ...] [--duration 30] [--scene commerce|local|home_service|education]
+         [--lang zh|en] [--note "..."] [--confirm]      超越爆款: break down a hit video, write a better script
+  replica --video file|asset_id [--product img ...] [--person img ...] [--background img ...] [--voice audio]
+         [--prompt "what to change"] [--sound original|ai|mute] [--duration 10] [--model K] [--resolution 480p]
+         [--portrait-consent] [--confirm]               深度复刻: same moves and shots, your product / person
   task <id> [--wait]            status / result of one task
   tasks [--limit 10]            recent tasks
 
-  Without --confirm, image / video / script only return the price — nothing is charged.
+  Without --confirm, image / video / script / viral / replica / imageset-generate only return the price —
+  nothing is charged. imageset (the plan) is free.
   Extra flags: --out DIR (download folder, default ./coolai-output)  --no-wait  --no-download  --timeout SEC
 `
 
@@ -535,6 +986,29 @@ async function main() {
       break
     case 'script':
       out = await director(opt)
+      break
+    case 'packs':
+      out = { ok: true, packs: await imagePacks(), copy_languages: COPY_LANGS }
+      break
+    case 'styles':
+      out = { ok: true, ...(await styleLibrary()) }
+      break
+    case 'imageset':
+      out = await imageSetPlan(opt)
+      break
+    case 'imageset-edit':
+      if (!pos[1]) throw new CliError('Usage: imageset-edit <set_id> --row N --prompt "..."')
+      out = await imageSetEdit(pos[1], opt)
+      break
+    case 'imageset-generate':
+      if (!pos[1]) throw new CliError('Usage: imageset-generate <set_id> [--confirm]')
+      out = await imageSetGenerate(pos[1], opt)
+      break
+    case 'viral':
+      out = await viral(opt)
+      break
+    case 'replica':
+      out = await generate('replica', opt)
       break
     case 'task': {
       if (!pos[1]) throw new CliError('Usage: task <id> [--wait]')

@@ -13,7 +13,9 @@ Works with **Claude Code, Codex, WorkBuddy, DeepSeek Harness** and other tools t
 
 - **AI video**: turn one sentence or one product photo into a selling, lifestyle, talking-head or brand short (Seedance, Wan and more), with reference images, video or audio
 - **AI director**: 19 industry skills (e-commerce, local shops, brand ads, short dramas) that write the storyboard before the video is made
+- **Beat the Viral and Deep Replica**: break down a hit video and write a better script for your product, or copy a reference video's moves and shots with your own product or person
 - **AI images**: product shots, posters and illustrations (GPT Image, Gemini, Grok and more), with reference images for editing
+- **18 image skill packs**: product detail sets, lifestyle post sets and brand mascot sets from one photo (plan first, free), plus white-background shots, face swap, clothing try-on, background change, retouch, storyboards and more
 - Balance, prices and task status; finished files are downloaded for you
 
 Before every generation the agent tells you the credit cost, and only spends after you agree.
@@ -108,20 +110,26 @@ node skills/coolai/scripts/coolai.mjs help
 | `models [video\|image]` | models available now |
 | `skills` | video skills for the AI director |
 | `upload <file>` | upload an image, video or audio file |
+| `packs` / `styles` | image skill packs, art styles and theme colours |
 | `image --prompt "..."` | generate images |
+| `image --pack ID --slot key=file` | one image with a skill pack |
+| `imageset --pack ID --slot product=file` | plan a whole image set (free) |
+| `imageset-generate <set_id>` | price, then generate the set |
 | `video --prompt "..."` | generate a video |
 | `script --brief "..."` | let the AI director write a storyboard |
+| `viral --video file` | Beat the Viral: break down a hit video, write a better script |
+| `replica --video file` | Deep Replica: same moves and shots, your material |
 | `task <id> [--wait]` | status and result of a task |
 | `tasks` | recent tasks |
 
-Without `--confirm`, `image`, `video` and `script` only return the price and charge nothing.
+Without `--confirm`, generation commands only return the price and charge nothing. Planning an image set is free.
 
 ## Troubleshooting
 
 - **"API key missing, wrong or revoked"**: check at <https://www.coolai.mov/account/api-keys> that the key is still enabled, or create a new one and set it again.
 - **Not enough credits**: top up on the website, or try 480p and a shorter duration first.
 - **The agent does not see the skill after installing**: restart the tool, and make sure the path is `…/skills/coolai/SKILL.md` with no extra folder level.
-- **More tools** (upscaling, subtitle and watermark removal, digital human, canvas and more) are on the website: <https://www.coolai.mov>
+- **More tools** (upscaling, subtitle and watermark removal, digital human, viral remix, editor, canvas) are on the website: <https://www.coolai.mov>
 
 ---
 
@@ -142,7 +150,9 @@ Without `--confirm`, `image`, `video` and `script` only return the price and cha
 
 - **AI 视频**：一句话或一张产品图生成带货 / 种草 / 口播 / 品牌短片（Seedance、Wan 等模型），可带参考图、参考视频、参考声音
 - **超级编导**：19 个行业技能（电商带货、同城到店、品牌广告、剧情短片），AI 先写好分镜脚本再出片
+- **超越爆款、深度复刻**：拆解爆款视频、按你的商品写一条更好的脚本；或照着参考视频的动作和镜头，换成你的商品 / 人物
 - **AI 图片**：产品主图、海报、配图（GPT Image、Gemini、Grok 等模型），可带参考图改图
+- **18 个图片技能包**：商详套图、种草图文、品牌 IP 形象（一张图出整套，先出方案不扣积分），以及商品白底图、模特换脸、服装上身、人物入景、图片精修、分镜故事版等
 - 查余额、查价格、查任务，成片自动下载到本地
 
 每次生成前，助手都会先告诉你要花多少积分，你同意了才会扣。
@@ -239,17 +249,23 @@ node skills/coolai/scripts/coolai.mjs help
 | `models [video\|image]` | 当前可用的模型 |
 | `skills` | 超级编导的视频技能列表 |
 | `upload <文件>` | 上传图片 / 视频 / 音频 |
+| `packs` / `styles` | 图片技能包、画风和主题色列表 |
 | `image --prompt "..."` | 生成图片 |
+| `image --pack 技能包 --slot 素材位=文件` | 用技能包出一张图 |
+| `imageset --pack 技能包 --slot product=文件` | 套图：先出方案（不扣积分） |
+| `imageset-generate <套图编号>` | 套图：报价，确认后出图 |
 | `video --prompt "..."` | 生成视频 |
 | `script --brief "..."` | 超级编导写分镜脚本 |
+| `viral --video 文件` | 超越爆款：拆解爆款视频，写一条更好的脚本 |
+| `replica --video 文件` | 深度复刻：照着参考视频的动作和镜头出片 |
 | `task <任务号> [--wait]` | 查看任务状态和结果 |
 | `tasks` | 最近的任务 |
 
-`image`、`video`、`script` 不加 `--confirm` 只报价、不扣积分。
+生成类命令不加 `--confirm` 只报价、不扣积分；套图出方案本身不扣积分。
 
 ## 常见问题
 
 - **提示密钥无效**：到 <https://www.coolai.mov/account/api-keys> 确认密钥没有被停用或删除，或重新生成一把再设置。
 - **积分不足**：到网站充值，或先用 480p、较短时长试。
 - **装好后助手不认识这个技能**：重启工具；确认路径是 `…/skills/coolai/SKILL.md`，没有多套一层文件夹。
-- **更多功能**（画质增强、字幕 / 水印擦除、数字人、画布等）请到网站使用：<https://www.coolai.mov>
+- **更多功能**（画质增强、字幕 / 水印擦除、数字人、爆款裂变、剪辑台、画布）请到网站使用：<https://www.coolai.mov>

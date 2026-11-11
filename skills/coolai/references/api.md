@@ -112,3 +112,75 @@ Poll every 5–10 seconds. Failed tasks are refunded automatically.
 4. `GET /api/v1/video-creator/conversations/<cid>/script/operations/<client_operation_id>` → `status`, `content` (the script).
 
 Use the script text as the `prompt` of a video task.
+
+## Image skill packs
+
+```bash
+curl -s https://www.coolai.mov/api/v1/tools/image-generation/skill-packs   # .skill_packs[] → skill_pack_id, label, reference_solt_config.solts[]
+curl -s https://www.coolai.mov/api/v1/public/style-library                 # .styles[] / .colors[] → id
+```
+
+One image with a pack: an `image_generation` task plus `"skill_pack_id": "<id>"`. `reference_elements`
+lists the images in slot order (`图片1`, `图片2` …) and `reference_slots` says how many images each slot
+got: `[{"key": "model", "name": "模特", "count": 1}, {"key": "cloth", "name": "上身/全身装", "count": 1}]`.
+`prompt` is optional.
+
+## Image sets (商详套图 / 种草图文 / 品牌 IP 形象)
+
+1. Plan (free) — `POST /api/v1/batches`:
+
+```json
+{
+  "type": "ecommerce_image_set", "tool_slug": "ecommerce-image-set",
+  "skill_pack_id": "ecommerce-image-set",
+  "model_key": "image.gpt_image_2_6_sunburst", "logical_model_key": "image.gpt_image_2_6_sunburst",
+  "rows": [{"module_key": "hero", "module_label": "首图 / 主视觉", "index": 0},
+           {"module_key": "scene", "module_label": "场景图 / 使用", "index": 0}],
+  "count": 2, "aspect_ratio": "3:4", "resolution": "1k", "quality": "high", "output_format": "png",
+  "copy_language": "中文", "prompt": "product facts",
+  "reference_elements": [{"asset_id": "<id>", "media_type": "image", "mention_label": "图片1", "ref_role": "product"}],
+  "reference_slots": [{"key": "product", "name": "商品", "count": 1}],
+  "analysis_only": true
+}
+```
+
+For lifestyle posts add `"skill_pack_id": "social-image-set", "set_kind": "social", "title": "种草图文"`;
+for mascots `"skill_pack_id": "ip-mascot-set", "set_kind": "ip", "title": "品牌 IP 形象"`. Optional
+`style_id` / `color_id`. Module keys are listed by the script's `packs` command.
+
+2. Poll `GET /api/v1/batches/<id>` until `status` is `succeeded`; `result.stage` is `analyzed` and each
+   entry of `items[]` has `output.row.final_prompt` and `status: "pending"`.
+3. Optional: `PATCH /api/v1/batches/<id>/ecommerce-image-set/analysis-row` `{"row_index": 1, "final_prompt": "..."}`.
+4. Price: `POST /api/v1/batches/<id>/ecommerce-image-set/row-quote` `{}` → `credits`, `count`, `unit`.
+5. Generate: `POST /api/v1/batches/<id>/ecommerce-image-set/row-generations` `{}` (charges the quoted credits),
+   then poll the batch until no item is `running`; each item's `output.url` is the image.
+
+## 超越爆款 (three tasks, each `POST /api/v1/batches` with `"tool_slug": "prompt-generator"`)
+
+1. `{"type": "write_material_analysis", "reference_elements": [product images]}` → `result.items[] {label, description}` (skip if no images)
+2. `{"type": "video_script_breakdown", "reference_elements": [{"asset_id": "<video>", "media_type": "video", "mention_label": "视频1"}]}` → `result.markdown`
+3. `{"type": "write_script_generate", "reference_elements": [product images], "analyses": [...from 1], "characters": [],
+   "business_scene": "commerce", "script_language": "zh", "duration_seconds": 15, "mode": "reference",
+   "breakdown_batch_id": "<id from 2>", "extra_instruction": "..."}` → `result.markdown` (the script)
+
+Quote each with `POST /api/v1/credits/quote` `{"type": "<type>", "tool_slug": "prompt-generator"}`.
+
+## 深度复刻
+
+```json
+{
+  "type": "depth_video_clone", "tool_slug": "depth-video-clone",
+  "logical_model_key": "video.doubao_seedance_2_0_mini", "prompt": "what to change",
+  "aspect_ratio": "9:16", "resolution": "480p", "duration_seconds": 10, "generate_count": 1,
+  "generate_audio": false, "keep_source_audio": true,
+  "reference_elements": [
+    {"asset_id": "<video>", "media_type": "video", "mention_label": "视频1"},
+    {"asset_id": "<image>", "media_type": "image", "mention_label": "商品1", "ref_role": "product"},
+    {"asset_id": "<image>", "media_type": "image", "mention_label": "人物1", "ref_role": "person"}
+  ],
+  "confirmed_estimated_credits": 1.89
+}
+```
+
+`confirmed_estimated_credits` is the `estimated_credits` from the quote for the same body.
+
