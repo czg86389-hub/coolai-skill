@@ -7,6 +7,8 @@
 Use [COOL AI](https://www.coolai.mov) from your AI coding agent to generate marketing videos and images.
 Works with **Claude Code, Codex, WorkBuddy, DeepSeek Harness** and other tools that load `SKILL.md` skills.
 
+📖 Step-by-step guide on the website: <https://www.coolai.mov/skill>
+
 ## What it does
 
 - **AI video**: turn one sentence or one product photo into a selling, lifestyle, talking-head or brand short (Seedance, Wan and more), with reference images, video or audio
@@ -133,6 +135,8 @@ Without `--confirm`, `image`, `video` and `script` only return the price and cha
 
 让你的 AI 编程助手直接调用 [COOL AI（酷AI）](https://www.coolai.mov) 生成营销视频和图片。
 支持 **Claude Code、Codex、WorkBuddy、DeepSeek Harness**，以及其它支持 `SKILL.md` 的工具。
+
+📖 网站上的图文使用说明：<https://www.coolai.mov/skill>
 
 ## 能做什么
 
