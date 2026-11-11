@@ -1,8 +1,135 @@
-# COOL AI Skill · 酷AI 技能
+# COOL AI Skill
 
-**简体中文** | [English](#english)
+**English** | [简体中文](#简体中文)
 
-<p align="center"><img src="docs/screenshots/home.jpg" alt="COOL AI · AI 营销智能体 / AI Marketing Agent" width="100%"></p>
+<p align="center"><img src="docs/screenshots/en-home.jpg" alt="COOL AI: AI Marketing Agent for e-commerce, retail stores and factories" width="100%"></p>
+
+Use [COOL AI](https://www.coolai.mov) from your AI coding agent to generate marketing videos and images.
+Works with **Claude Code, Codex, WorkBuddy, DeepSeek Harness** and other tools that load `SKILL.md` skills.
+
+## What it does
+
+- **AI video**: turn one sentence or one product photo into a selling, lifestyle, talking-head or brand short (Seedance, Wan and more), with reference images, video or audio
+- **AI director**: 19 industry skills (e-commerce, local shops, brand ads, short dramas) that write the storyboard before the video is made
+- **AI images**: product shots, posters and illustrations (GPT Image, Gemini, Grok and more), with reference images for editing
+- Balance, prices and task status; finished files are downloaded for you
+
+Before every generation the agent tells you the credit cost, and only spends after you agree.
+
+## Screenshots
+
+This is the COOL AI website (English interface). Videos and images made through the skill also show up in your account's task queue.
+
+<table>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/en-video-promo-conversion.jpg" alt="AI video · Promo conversion: a product photo in, a storyboarded 15-second ad out (VIP price shown on the button)"><br><sub>AI video · Promo conversion: a product photo in, a storyboarded 15-second ad out (VIP price shown on the button)</sub></td><td width="50%" valign="top"><img src="docs/screenshots/en-image-product-detail-set.jpg" alt="AI images · Product detail set: hero, scene, pain-point and selling-point images from one product photo"><br><sub>AI images · Product detail set: hero, scene, pain-point and selling-point images from one product photo</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/video-scene-seeding.jpg" alt="AI video · Scene seeding: the AI director writes the shots"><br><sub>AI video · Scene seeding: the AI director writes the shots</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-reversal-drama.jpg" alt="AI video · Plot-twist drama: a 28-second story ad from one sentence"><br><sub>AI video · Plot-twist drama: a 28-second story ad from one sentence</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/en-video-deep-replica.jpg" alt="AI video · Deep Replica: copy the moves and shots of a reference video with your own person or product"><br><sub>AI video · Deep Replica: copy the moves and shots of a reference video with your own person or product</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-beyond-viral.jpg" alt="AI video · Beat the Viral: break down a hit video and make a better one"><br><sub>AI video · Beat the Viral: break down a hit video and make a better one</sub></td></tr>
+</table>
+
+## Install
+
+Requires [Node.js 18 or later](https://nodejs.org).
+
+### One-step install (recommended)
+
+```bash
+git clone https://github.com/czg86389-hub/coolai-skill.git
+```
+
+macOS / Linux / Git Bash:
+
+```bash
+bash coolai-skill/install.sh
+```
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File coolai-skill\install.ps1
+```
+
+The installer adds the skill to every supported tool it finds. To install for one tool only:
+`bash install.sh claude` (choose `claude`, `codex`, `workbuddy` or `dsh`).
+
+### Manual install
+
+Copy the whole `skills/coolai` folder to the matching directory, then restart the tool.
+
+| Tool | Directory (on Windows replace `~` with `%USERPROFILE%`) |
+|---|---|
+| Claude Code | `~/.claude/skills/coolai` |
+| Codex | `~/.codex/skills/coolai` |
+| WorkBuddy | `~/.workbuddy/skills/coolai` |
+| DeepSeek Harness | `~/.dsh/skills/coolai` |
+| Other Agent Skills tools | `~/.agents/skills/coolai` |
+
+### As a Claude Code plugin
+
+```
+/plugin marketplace add czg86389-hub/coolai-skill
+/plugin install coolai@coolai
+```
+
+## Get started
+
+1. Sign up at <https://www.coolai.mov> (joining as a Member is free).
+2. Create an API key at <https://www.coolai.mov/account/api-keys> (it starts with `ml_sk_`).
+3. Tell your agent: "Use COOL AI, my key is ml_sk_…", or set the `COOLAI_API_KEY` environment variable yourself.
+4. Then ask for what you need, for example:
+   - "Use COOL AI to make a 10-second lifestyle video from this thermos photo"
+   - "Use COOL AI to generate a vertical Black Friday poster"
+   - "How many COOL AI credits do I have left?"
+
+The key is stored only on your own computer in `~/.coolai/config.json`, and you can revoke it on the website at any time.
+
+## Billing
+
+Credits come from your own COOL AI account, exactly as on the website:
+
+- **Member**: the standard price shown on the website
+- **Lifetime VIP**: the VIP discount on every feature, applied automatically
+
+Failed tasks are refunded automatically.
+
+## Use it from the command line
+
+You can also run the script without an AI agent:
+
+```bash
+node skills/coolai/scripts/coolai.mjs help
+```
+
+| Command | What it does |
+|---|---|
+| `auth status` | account, member level, credit balance |
+| `auth set <key>` | save the API key |
+| `models [video\|image]` | models available now |
+| `skills` | video skills for the AI director |
+| `upload <file>` | upload an image, video or audio file |
+| `image --prompt "..."` | generate images |
+| `video --prompt "..."` | generate a video |
+| `script --brief "..."` | let the AI director write a storyboard |
+| `task <id> [--wait]` | status and result of a task |
+| `tasks` | recent tasks |
+
+Without `--confirm`, `image`, `video` and `script` only return the price and charge nothing.
+
+## Troubleshooting
+
+- **"API key missing, wrong or revoked"**: check at <https://www.coolai.mov/account/api-keys> that the key is still enabled, or create a new one and set it again.
+- **Not enough credits**: top up on the website, or try 480p and a shorter duration first.
+- **The agent does not see the skill after installing**: restart the tool, and make sure the path is `…/skills/coolai/SKILL.md` with no extra folder level.
+- **More tools** (upscaling, subtitle and watermark removal, digital human, canvas and more) are on the website: <https://www.coolai.mov>
+
+---
+
+<a id="简体中文"></a>
+
+# 简体中文 · 酷AI 技能
+
+[English](#cool-ai-skill) | **简体中文**
+
+<p align="center"><img src="docs/screenshots/home.jpg" alt="COOL AI · AI 营销智能体" width="100%"></p>
 
 让你的 AI 编程助手直接调用 [COOL AI（酷AI）](https://www.coolai.mov) 生成营销视频和图片。
 支持 **Claude Code、Codex、WorkBuddy、DeepSeek Harness**，以及其它支持 `SKILL.md` 的工具。
@@ -122,130 +249,3 @@ node skills/coolai/scripts/coolai.mjs help
 - **积分不足**：到网站充值，或先用 480p、较短时长试。
 - **装好后助手不认识这个技能**：重启工具；确认路径是 `…/skills/coolai/SKILL.md`，没有多套一层文件夹。
 - **更多功能**（画质增强、字幕 / 水印擦除、数字人、画布等）请到网站使用：<https://www.coolai.mov>
-
----
-
-<a id="english"></a>
-
-# English
-
-[简体中文](#cool-ai-skill--酷ai-技能) | **English**
-
-Use [COOL AI](https://www.coolai.mov) from your AI coding agent to generate marketing videos and images.
-Works with **Claude Code, Codex, WorkBuddy, DeepSeek Harness** and other tools that load `SKILL.md` skills.
-
-## What it does
-
-- **AI video**: turn one sentence or one product photo into a selling, lifestyle, talking-head or brand short (Seedance, Wan and more), with reference images, video or audio
-- **AI director**: 19 industry skills (e-commerce, local shops, brand ads, short dramas) that write the storyboard before the video is made
-- **AI images**: product shots, posters and illustrations (GPT Image, Gemini, Grok and more), with reference images for editing
-- Balance, prices and task status; finished files are downloaded for you
-
-Before every generation the agent tells you the credit cost, and only spends after you agree.
-
-## Screenshots
-
-This is the COOL AI website (English interface). Videos and images made through the skill also show up in your account's task queue.
-
-<img src="docs/screenshots/en-home.jpg" alt="COOL AI home: AI Marketing Agent for e-commerce, retail stores and factories"><br><sub>Home: video creation, image creation, chat with the agent, and every tool in one place</sub>
-
-<table>
-<tr><td width="50%" valign="top"><img src="docs/screenshots/en-video-promo-conversion.jpg" alt="AI video · Promo conversion: a product photo in, a storyboarded 15-second ad out (VIP price shown on the button)"><br><sub>AI video · Promo conversion: a product photo in, a storyboarded 15-second ad out (VIP price shown on the button)</sub></td><td width="50%" valign="top"><img src="docs/screenshots/en-image-product-detail-set.jpg" alt="AI images · Product detail set: hero, scene, pain-point and selling-point images from one product photo"><br><sub>AI images · Product detail set: hero, scene, pain-point and selling-point images from one product photo</sub></td></tr>
-<tr><td width="50%" valign="top"><img src="docs/screenshots/video-scene-seeding.jpg" alt="AI video · Scene seeding: the AI director writes the shots"><br><sub>AI video · Scene seeding: the AI director writes the shots</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-reversal-drama.jpg" alt="AI video · Plot-twist drama: a 28-second story ad from one sentence"><br><sub>AI video · Plot-twist drama: a 28-second story ad from one sentence</sub></td></tr>
-<tr><td width="50%" valign="top"><img src="docs/screenshots/en-video-deep-replica.jpg" alt="AI video · Deep Replica: copy the moves and shots of a reference video with your own person or product"><br><sub>AI video · Deep Replica: copy the moves and shots of a reference video with your own person or product</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-beyond-viral.jpg" alt="AI video · Beat the Viral: break down a hit video and make a better one"><br><sub>AI video · Beat the Viral: break down a hit video and make a better one</sub></td></tr>
-</table>
-
-## Install
-
-Requires [Node.js 18 or later](https://nodejs.org).
-
-### One-step install (recommended)
-
-```bash
-git clone https://github.com/czg86389-hub/coolai-skill.git
-```
-
-macOS / Linux / Git Bash:
-
-```bash
-bash coolai-skill/install.sh
-```
-
-Windows PowerShell:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File coolai-skill\install.ps1
-```
-
-The installer adds the skill to every supported tool it finds. To install for one tool only:
-`bash install.sh claude` (choose `claude`, `codex`, `workbuddy` or `dsh`).
-
-### Manual install
-
-Copy the whole `skills/coolai` folder to the matching directory, then restart the tool.
-
-| Tool | Directory (on Windows replace `~` with `%USERPROFILE%`) |
-|---|---|
-| Claude Code | `~/.claude/skills/coolai` |
-| Codex | `~/.codex/skills/coolai` |
-| WorkBuddy | `~/.workbuddy/skills/coolai` |
-| DeepSeek Harness | `~/.dsh/skills/coolai` |
-| Other Agent Skills tools | `~/.agents/skills/coolai` |
-
-### As a Claude Code plugin
-
-```
-/plugin marketplace add czg86389-hub/coolai-skill
-/plugin install coolai@coolai
-```
-
-## Get started
-
-1. Sign up at <https://www.coolai.mov> (joining as a Member is free).
-2. Create an API key at <https://www.coolai.mov/account/api-keys> (it starts with `ml_sk_`).
-3. Tell your agent: "Use COOL AI, my key is ml_sk_…", or set the `COOLAI_API_KEY` environment variable yourself.
-4. Then ask for what you need, for example:
-   - "Use COOL AI to make a 10-second lifestyle video from this thermos photo"
-   - "Use COOL AI to generate a vertical Black Friday poster"
-   - "How many COOL AI credits do I have left?"
-
-The key is stored only on your own computer in `~/.coolai/config.json`, and you can revoke it on the website at any time.
-
-## Billing
-
-Credits come from your own COOL AI account, exactly as on the website:
-
-- **Member**: the standard price shown on the website
-- **Lifetime VIP**: the VIP discount on every feature, applied automatically
-
-Failed tasks are refunded automatically.
-
-## Use it from the command line
-
-You can also run the script without an AI agent:
-
-```bash
-node skills/coolai/scripts/coolai.mjs help
-```
-
-| Command | What it does |
-|---|---|
-| `auth status` | account, member level, credit balance |
-| `auth set <key>` | save the API key |
-| `models [video\|image]` | models available now |
-| `skills` | video skills for the AI director |
-| `upload <file>` | upload an image, video or audio file |
-| `image --prompt "..."` | generate images |
-| `video --prompt "..."` | generate a video |
-| `script --brief "..."` | let the AI director write a storyboard |
-| `task <id> [--wait]` | status and result of a task |
-| `tasks` | recent tasks |
-
-Without `--confirm`, `image`, `video` and `script` only return the price and charge nothing.
-
-## Troubleshooting
-
-- **"API key missing, wrong or revoked"**: check at <https://www.coolai.mov/account/api-keys> that the key is still enabled, or create a new one and set it again.
-- **Not enough credits**: top up on the website, or try 480p and a shorter duration first.
-- **The agent does not see the skill after installing**: restart the tool, and make sure the path is `…/skills/coolai/SKILL.md` with no extra folder level.
-- **More tools** (upscaling, subtitle and watermark removal, digital human, canvas and more) are on the website: <https://www.coolai.mov>
