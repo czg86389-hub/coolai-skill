@@ -2,6 +2,8 @@
 
 **简体中文** | [English](#english)
 
+<p align="center"><img src="docs/screenshots/home.jpg" alt="COOL AI · AI 营销智能体 / AI Marketing Agent" width="100%"></p>
+
 让你的 AI 编程助手直接调用 [COOL AI（酷AI）](https://www.coolai.mov) 生成营销视频和图片。
 支持 **Claude Code、Codex、WorkBuddy、DeepSeek Harness**，以及其它支持 `SKILL.md` 的工具。
 
@@ -13,6 +15,18 @@
 - 查余额、查价格、查任务，成片自动下载到本地
 
 每次生成前，助手都会先告诉你要花多少积分，你同意了才会扣。
+
+## 界面预览
+
+以下是 COOL AI 网站的界面，用 Skill 生成的视频和图片也会出现在你账号的任务队列里。
+
+<table>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/video-scene-seeding.jpg" alt="AI 视频 · 场景种草：上传产品图，超级编导写好分镜，一键出片"><br><sub>AI 视频 · 场景种草：上传产品图，超级编导写好分镜，一键出片</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-reversal-drama.jpg" alt="AI 视频 · 反转短剧：一句话生成 28 秒剧情带货短片"><br><sub>AI 视频 · 反转短剧：一句话生成 28 秒剧情带货短片</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/video-beyond-viral.jpg" alt="AI 视频 · 超越爆款：拆解爆款视频，生成更好的一条"><br><sub>AI 视频 · 超越爆款：拆解爆款视频，生成更好的一条</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-english-ui.jpg" alt="支持英文界面：Promo conversion（促销转化）"><br><sub>支持英文界面：Promo conversion（促销转化）</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/image-product-detail-set.jpg" alt="AI 图片 · 商详套图：一张商品图生成首图、场景图、痛点图等整套详情图"><br><sub>AI 图片 · 商详套图：一张商品图生成首图、场景图、痛点图等整套详情图</sub></td><td width="50%" valign="top"><img src="docs/screenshots/image-seeding-posts.jpg" alt="AI 图片 · 种草图文 / 品牌 IP 形象：小红书、抖音种草图一键生成"><br><sub>AI 图片 · 种草图文 / 品牌 IP 形象：小红书、抖音种草图一键生成</sub></td></tr>
+</table>
+
+<img src="docs/screenshots/toolbox.jpg" alt="AI 工具箱"><br><sub>AI 工具箱：商详套图、数字人、视频链接下载、深度复刻、爆款裂变、字幕擦除、去水印、画质增强、剪辑台（这些在网站上使用）</sub>
 
 ## 安装
 
@@ -127,6 +141,18 @@ Works with **Claude Code, Codex, WorkBuddy, DeepSeek Harness** and other tools t
 - Balance, prices and task status; finished files are downloaded for you
 
 Before every generation the agent tells you the credit cost, and only spends after you agree.
+
+## Screenshots
+
+This is the COOL AI website. Videos and images made through the skill also show up in your account's task queue.
+
+<table>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/video-english-ui.jpg" alt="AI video · Promo conversion: product photo in, storyboarded ad out"><br><sub>AI video · Promo conversion: product photo in, storyboarded ad out</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-scene-seeding.jpg" alt="AI video · Scene seeding: the AI director writes the shots"><br><sub>AI video · Scene seeding: the AI director writes the shots</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/video-reversal-drama.jpg" alt="AI video · Plot-twist drama: a 28-second story ad from one sentence"><br><sub>AI video · Plot-twist drama: a 28-second story ad from one sentence</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-beyond-viral.jpg" alt="AI video · Beyond viral: break down a hit video and make a better one"><br><sub>AI video · Beyond viral: break down a hit video and make a better one</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/image-product-detail-set.jpg" alt="AI images · Product detail set: hero, scene and pain-point images from one photo"><br><sub>AI images · Product detail set: hero, scene and pain-point images from one photo</sub></td><td width="50%" valign="top"><img src="docs/screenshots/image-seeding-posts.jpg" alt="AI images · Lifestyle posts and brand mascot sets"><br><sub>AI images · Lifestyle posts and brand mascot sets</sub></td></tr>
+</table>
+
+<img src="docs/screenshots/toolbox.jpg" alt="AI toolbox"><br><sub>AI toolbox on the website: product detail sets, digital human, video link download, motion clone, viral remix, subtitle and watermark removal, upscaling, editor</sub>
 
 ## Install
 
