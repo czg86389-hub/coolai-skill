@@ -22,7 +22,7 @@
 
 <table>
 <tr><td width="50%" valign="top"><img src="docs/screenshots/video-scene-seeding.jpg" alt="AI 视频 · 场景种草：上传产品图，超级编导写好分镜，一键出片"><br><sub>AI 视频 · 场景种草：上传产品图，超级编导写好分镜，一键出片</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-reversal-drama.jpg" alt="AI 视频 · 反转短剧：一句话生成 28 秒剧情带货短片"><br><sub>AI 视频 · 反转短剧：一句话生成 28 秒剧情带货短片</sub></td></tr>
-<tr><td width="50%" valign="top"><img src="docs/screenshots/video-beyond-viral.jpg" alt="AI 视频 · 超越爆款：拆解爆款视频，生成更好的一条"><br><sub>AI 视频 · 超越爆款：拆解爆款视频，生成更好的一条</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-english-ui.jpg" alt="支持英文界面：Promo conversion（促销转化）"><br><sub>支持英文界面：Promo conversion（促销转化）</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/video-beyond-viral.jpg" alt="AI 视频 · 超越爆款：拆解爆款视频，生成更好的一条"><br><sub>AI 视频 · 超越爆款：拆解爆款视频，生成更好的一条</sub></td><td width="50%" valign="top"><img src="docs/screenshots/en-video-promo-conversion.jpg" alt="支持英文界面：Promo conversion（促销转化）"><br><sub>支持英文界面：Promo conversion（促销转化）</sub></td></tr>
 <tr><td width="50%" valign="top"><img src="docs/screenshots/image-product-detail-set.jpg" alt="AI 图片 · 商详套图：一张商品图生成首图、场景图、痛点图等整套详情图"><br><sub>AI 图片 · 商详套图：一张商品图生成首图、场景图、痛点图等整套详情图</sub></td><td width="50%" valign="top"><img src="docs/screenshots/image-seeding-posts.jpg" alt="AI 图片 · 种草图文 / 品牌 IP 形象：小红书、抖音种草图一键生成"><br><sub>AI 图片 · 种草图文 / 品牌 IP 形象：小红书、抖音种草图一键生成</sub></td></tr>
 </table>
 
@@ -144,15 +144,14 @@ Before every generation the agent tells you the credit cost, and only spends aft
 
 ## Screenshots
 
-This is the COOL AI website. Videos and images made through the skill also show up in your account's task queue.
+This is the COOL AI website (English interface). Videos and images made through the skill also show up in your account's task queue.
+
+<img src="docs/screenshots/en-home.jpg" alt="COOL AI home: AI Marketing Agent for e-commerce, retail stores and factories"><br><sub>Home: video creation, image creation, chat with the agent, and every tool in one place</sub>
 
 <table>
-<tr><td width="50%" valign="top"><img src="docs/screenshots/video-english-ui.jpg" alt="AI video · Promo conversion: product photo in, storyboarded ad out"><br><sub>AI video · Promo conversion: product photo in, storyboarded ad out</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-scene-seeding.jpg" alt="AI video · Scene seeding: the AI director writes the shots"><br><sub>AI video · Scene seeding: the AI director writes the shots</sub></td></tr>
-<tr><td width="50%" valign="top"><img src="docs/screenshots/video-reversal-drama.jpg" alt="AI video · Plot-twist drama: a 28-second story ad from one sentence"><br><sub>AI video · Plot-twist drama: a 28-second story ad from one sentence</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-beyond-viral.jpg" alt="AI video · Beyond viral: break down a hit video and make a better one"><br><sub>AI video · Beyond viral: break down a hit video and make a better one</sub></td></tr>
-<tr><td width="50%" valign="top"><img src="docs/screenshots/image-product-detail-set.jpg" alt="AI images · Product detail set: hero, scene and pain-point images from one photo"><br><sub>AI images · Product detail set: hero, scene and pain-point images from one photo</sub></td><td width="50%" valign="top"><img src="docs/screenshots/image-seeding-posts.jpg" alt="AI images · Lifestyle posts and brand mascot sets"><br><sub>AI images · Lifestyle posts and brand mascot sets</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/en-video-promo-conversion.jpg" alt="AI video · Promo conversion: a product photo in, a storyboarded 15-second ad out (VIP price shown on the button)"><br><sub>AI video · Promo conversion: a product photo in, a storyboarded 15-second ad out (VIP price shown on the button)</sub></td><td width="50%" valign="top"><img src="docs/screenshots/en-image-product-detail-set.jpg" alt="AI images · Product detail set: hero, scene, pain-point and selling-point images from one product photo"><br><sub>AI images · Product detail set: hero, scene, pain-point and selling-point images from one product photo</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/screenshots/video-scene-seeding.jpg" alt="AI video · Scene seeding: the AI director writes the shots"><br><sub>AI video · Scene seeding: the AI director writes the shots</sub></td><td width="50%" valign="top"><img src="docs/screenshots/video-reversal-drama.jpg" alt="AI video · Plot-twist drama: a 28-second story ad from one sentence"><br><sub>AI video · Plot-twist drama: a 28-second story ad from one sentence</sub></td></tr>
 </table>
-
-<img src="docs/screenshots/toolbox.jpg" alt="AI toolbox"><br><sub>AI toolbox on the website: product detail sets, digital human, video link download, motion clone, viral remix, subtitle and watermark removal, upscaling, editor</sub>
 
 ## Install
 
