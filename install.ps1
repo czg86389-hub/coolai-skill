@@ -1,4 +1,4 @@
-# COOL AI skill installer (Windows PowerShell).
+﻿# COOL AI skill installer (Windows PowerShell).
 #   powershell -ExecutionPolicy Bypass -File install.ps1            every supported tool found on this PC
 #   powershell -ExecutionPolicy Bypass -File install.ps1 claude     only one: claude | codex | workbuddy | dsh | agents
 $ErrorActionPreference = 'Stop'
@@ -18,7 +18,7 @@ function Install-One($tool) {
   if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
   New-Item -ItemType Directory -Force -Path $dst | Out-Null
   Copy-Item (Join-Path $src '*') $dst -Recurse -Force
-  Write-Host "installed: $dst"
+  Write-Host "已安装 / installed: $dst"
 }
 if ($args.Count -gt 0) {
   foreach ($t in $args) {
@@ -30,7 +30,8 @@ if ($args.Count -gt 0) {
   foreach ($t in @('claude', 'codex', 'workbuddy', 'dsh')) {
     if (Test-Path (Split-Path $dirs[$t] -Parent)) { Install-One $t; $n++ }
   }
-  if ($n -eq 0) { Write-Host 'No supported tool found. Run: install.ps1 claude   (or codex / workbuddy / dsh)'; exit 1 }
+  if ($n -eq 0) { Write-Host '没找到支持的工具，请指定一个 / No supported tool found, name one: install.ps1 claude   (codex / workbuddy / dsh)'; exit 1 }
 }
-if (-not (Get-Command node -ErrorAction SilentlyContinue)) { Write-Host 'Note: Node.js 18+ is required to run the skill: https://nodejs.org' }
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { Write-Host '注意：需要 Node.js 18 或以上 / Note: Node.js 18+ is required: https://nodejs.org' }
+Write-Host '安装完成。重启工具后说：「用 COOL AI 做一条产品视频」'
 Write-Host 'Done. Restart the tool, then say: "use COOL AI to make a product video"'

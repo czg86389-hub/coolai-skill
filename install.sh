@@ -17,7 +17,7 @@ install_one() {
   mkdir -p "$dst"
   rm -rf "$dst/scripts" "$dst/references" "$dst/SKILL.md"
   cp -R "$SRC/." "$dst/"
-  echo "installed: $dst"
+  echo "已安装 / installed: $dst"
 }
 if [ $# -gt 0 ]; then
   for t in "$@"; do
@@ -29,7 +29,8 @@ else
   for t in claude codex workbuddy dsh; do
     if [ -d "$(dirname "${DIRS[$t]}")" ]; then install_one "$t"; n=$((n+1)); fi
   done
-  [ $n -gt 0 ] || { echo "No supported tool found. Run: bash install.sh claude   (or codex / workbuddy / dsh)"; exit 1; }
+  [ $n -gt 0 ] || { echo "没找到支持的工具，请指定一个 / No supported tool found, name one: bash install.sh claude   (codex / workbuddy / dsh)"; exit 1; }
 fi
-command -v node >/dev/null 2>&1 || echo "Note: Node.js 18+ is required to run the skill: https://nodejs.org"
+command -v node >/dev/null 2>&1 || echo "注意：需要 Node.js 18 或以上 / Note: Node.js 18+ is required: https://nodejs.org"
+echo "安装完成。重启工具后说：「用 COOL AI 做一条产品视频」"
 echo "Done. Restart the tool, then say: \"use COOL AI to make a product video\""

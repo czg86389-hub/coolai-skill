@@ -1,9 +1,9 @@
 # COOL AI Skill · 酷AI 技能
 
+**简体中文** | [English](README.en.md)
+
 让你的 AI 编程助手直接调用 [COOL AI（酷AI）](https://www.coolai.mov) 生成营销视频和图片。
 支持 **Claude Code、Codex、WorkBuddy、DeepSeek Harness**，以及其它支持 `SKILL.md` 的工具。
-
-[English](#english)
 
 ## 能做什么
 
@@ -18,11 +18,13 @@
 
 需要 [Node.js 18 或以上](https://nodejs.org)。
 
-**一键安装（推荐）**
+### 一键安装（推荐）
 
 ```bash
 git clone https://github.com/czg86389-hub/coolai-skill.git
 ```
+
+macOS / Linux / Git Bash：
 
 ```bash
 bash coolai-skill/install.sh
@@ -36,7 +38,9 @@ powershell -ExecutionPolicy Bypass -File coolai-skill\install.ps1
 
 脚本会自动装到本机已有的工具里。只装某一个：`bash install.sh claude`（可选 `claude`、`codex`、`workbuddy`、`dsh`）。
 
-**手动安装**：把 `skills/coolai` 整个文件夹复制到对应目录，然后重启工具。
+### 手动安装
+
+把 `skills/coolai` 整个文件夹复制到对应目录，然后重启工具。
 
 | 工具 | 目录（Windows 把 `~` 换成 `%USERPROFILE%`） |
 |---|---|
@@ -46,7 +50,7 @@ powershell -ExecutionPolicy Bypass -File coolai-skill\install.ps1
 | DeepSeek Harness | `~/.dsh/skills/coolai` |
 | 其它支持 Agent Skills 的工具 | `~/.agents/skills/coolai` |
 
-Claude Code 也可以用插件方式安装：
+### Claude Code 插件方式
 
 ```
 /plugin marketplace add czg86389-hub/coolai-skill
@@ -76,52 +80,30 @@ Claude Code 也可以用插件方式安装：
 
 ## 命令行直接用
 
+不通过 AI 助手也可以直接运行脚本：
+
 ```bash
 node skills/coolai/scripts/coolai.mjs help
 ```
 
----
+| 命令 | 作用 |
+|---|---|
+| `auth status` | 账号、会员级别、积分余额 |
+| `auth set <密钥>` | 保存 API 密钥 |
+| `models [video\|image]` | 当前可用的模型 |
+| `skills` | 超级编导的视频技能列表 |
+| `upload <文件>` | 上传图片 / 视频 / 音频 |
+| `image --prompt "..."` | 生成图片 |
+| `video --prompt "..."` | 生成视频 |
+| `script --brief "..."` | 超级编导写分镜脚本 |
+| `task <任务号> [--wait]` | 查看任务状态和结果 |
+| `tasks` | 最近的任务 |
 
-## English
+`image`、`video`、`script` 不加 `--confirm` 只报价、不扣积分。
 
-Use [COOL AI](https://www.coolai.mov) from your coding agent to generate marketing videos and images.
-Works with **Claude Code, Codex, WorkBuddy, DeepSeek Harness** and other tools that load `SKILL.md` skills.
+## 常见问题
 
-### What it does
-
-- **AI video** from one sentence or one product photo (Seedance, Wan and more), with reference images, video or audio
-- **AI director**: 19 industry skills that write the storyboard before the video is made
-- **AI images**: product shots, posters, illustrations (GPT Image, Gemini, Grok), with reference images
-- Balance, prices, task status; results are downloaded for you
-
-The agent always tells you the credit cost first and only spends after you agree.
-
-### Install
-
-Requires [Node.js 18+](https://nodejs.org).
-
-```bash
-git clone https://github.com/czg86389-hub/coolai-skill.git
-```
-
-```bash
-bash coolai-skill/install.sh
-```
-
-Windows: `powershell -ExecutionPolicy Bypass -File coolai-skill\install.ps1`
-
-Or copy the `skills/coolai` folder by hand to `~/.claude/skills/`, `~/.codex/skills/`, `~/.workbuddy/skills/`
-or `~/.dsh/skills/`, then restart the tool. Claude Code users can also run
-`/plugin marketplace add czg86389-hub/coolai-skill` and `/plugin install coolai@coolai`.
-
-### Get started
-
-1. Sign up at <https://www.coolai.mov> (joining as a Member is free).
-2. Create an API key at <https://www.coolai.mov/account/api-keys>.
-3. Tell your agent: "Use COOL AI, my key is ml_sk_…", or set `COOLAI_API_KEY` yourself.
-4. Ask for what you need: "Use COOL AI to make a 10-second product video from this photo."
-
-### Billing
-
-Credits come from your own COOL AI account, exactly as on the website: Members pay the standard price,
-Lifetime VIP members get the VIP discount on everything. Failed tasks are refunded automatically.
+- **提示密钥无效**：到 <https://www.coolai.mov/account/api-keys> 确认密钥没有被停用或删除，或重新生成一把再设置。
+- **积分不足**：到网站充值，或先用 480p、较短时长试。
+- **装好后助手不认识这个技能**：重启工具；确认路径是 `…/skills/coolai/SKILL.md`，没有多套一层文件夹。
+- **更多功能**（画质增强、字幕 / 水印擦除、数字人、画布等）请到网站使用：<https://www.coolai.mov>
