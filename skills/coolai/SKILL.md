@@ -27,7 +27,7 @@ raw HTTP calls in `references/api.md`.
 1. Run `auth status`. If `configured` is `true`, go on.
 2. Otherwise tell the user, in their language:
    - Open <https://www.coolai.mov> and sign up. Registering as a Member is free.
-   - Open <https://www.coolai.mov/account/api-keys>, create an API key and paste it here (it starts with `ml_sk_`).
+   - Open <https://www.coolai.mov/account/api-keys>, create an API key and paste it here (it starts with `ca_sk_`).
 3. Save it with `auth set <key>`. It is stored in `~/.coolai/config.json` on the user's machine.
    (Or the user can set the `COOLAI_API_KEY` environment variable themselves.)
 

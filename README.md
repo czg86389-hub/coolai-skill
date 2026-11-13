@@ -77,8 +77,8 @@ Copy the whole `skills/coolai` folder to the matching directory, then restart th
 ## Get started
 
 1. Sign up at <https://www.coolai.mov> (joining as a Member is free).
-2. Create an API key at <https://www.coolai.mov/account/api-keys> (it starts with `ml_sk_`).
-3. Tell your agent: "Use COOL AI, my key is ml_sk_…", or set the `COOLAI_API_KEY` environment variable yourself.
+2. Create an API key at <https://www.coolai.mov/account/api-keys> (it starts with `ca_sk_`).
+3. Tell your agent: "Use COOL AI, my key is ca_sk_…", or set the `COOLAI_API_KEY` environment variable yourself.
 4. Then ask for what you need, for example:
    - "Use COOL AI to make a 10-second lifestyle video from this thermos photo"
    - "Use COOL AI to generate a vertical Black Friday poster"
@@ -216,8 +216,8 @@ powershell -ExecutionPolicy Bypass -File coolai-skill\install.ps1
 ## 开始使用
 
 1. 打开 <https://www.coolai.mov> 注册账号（普通会员免费注册）。
-2. 打开 <https://www.coolai.mov/account/api-keys> 生成一把 API 密钥（`ml_sk_` 开头）。
-3. 在助手里说：「用 COOL AI，我的密钥是 ml_sk_…」，或者自己设置环境变量 `COOLAI_API_KEY`。
+2. 打开 <https://www.coolai.mov/account/api-keys> 生成一把 API 密钥（`ca_sk_` 开头）。
+3. 在助手里说：「用 COOL AI，我的密钥是 ca_sk_…」，或者自己设置环境变量 `COOLAI_API_KEY`。
 4. 然后直接提需求，例如：
    - 「用 COOL AI 给这张保温杯图片做一条 10 秒的种草视频」
    - 「用 COOL AI 生成一张双 11 促销海报，竖版」

@@ -1,7 +1,7 @@
 # COOL AI HTTP API (what `scripts/coolai.mjs` calls)
 
 Base URL: `https://www.coolai.mov`
-Auth header on every call: `Authorization: Bearer ml_sk_...` (the member's API key from
+Auth header on every call: `Authorization: Bearer ca_sk_...` (the member's API key from
 <https://www.coolai.mov/account/api-keys>). JSON bodies use `Content-Type: application/json`.
 Errors come back as `{"detail": {"message": "...", "reason": "..."}}` with a 4xx status
 (401 = bad key, 402 = not enough credits).

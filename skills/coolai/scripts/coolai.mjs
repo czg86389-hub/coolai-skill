@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // COOL AI skill CLI — zero dependencies, Node.js 18+.
-// Talks to https://www.coolai.mov with the member's own API key (ml_sk_...).
+// Talks to https://www.coolai.mov with the member's own API key (ca_sk_...).
 // Every command prints one JSON object on stdout; errors print {"ok":false,...} and exit 1.
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import crypto from 'node:crypto'
 
-const VERSION = '1.1.0'
+const VERSION = '1.1.1'
 const DEFAULT_BASE = 'https://www.coolai.mov'
 const CONFIG_DIR = path.join(os.homedir(), '.coolai')
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
@@ -907,7 +907,7 @@ async function buildReplica(opt) {
 // ---------- main ----------
 const HELP = `COOL AI skill CLI ${VERSION}  (${DEFAULT_BASE})
 
-  auth set <ml_sk_...>          save the member's API key (~/.coolai/config.json)
+  auth set <ca_sk_...>          save the member's API key (~/.coolai/config.json)
   auth status                   account, member level, credit balance
   models [video|image]          models that can be used
   skills                        video skills for the AI director (超级编导)
@@ -953,7 +953,7 @@ async function main() {
     case 'auth': {
       if (pos[1] === 'set') {
         const key = pos[2] || str(opt.key)
-        if (!/^ml_sk_[\w-]{20,}$/.test(key)) throw new CliError('That does not look like a COOL AI API key (it starts with ml_sk_). Create one at ' + CFG.base_url + '/account/api-keys')
+        if (!/^[a-z]{2}_sk_[\w-]{20,}$/.test(key)) throw new CliError('That does not look like a COOL AI API key (it starts with ca_sk_). Create one at ' + CFG.base_url + '/account/api-keys')
         CFG.api_key = key
         const acct = await me()
         saveConfig({ api_key: key })
